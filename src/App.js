@@ -36,7 +36,7 @@ class App extends Component {
 
           response.json()
             .then((json) => {
-              fetch(`http://data.parliament.uk/membersdataplatform/services/mnis/members/query/House=Commons%7Cconstituency=${json.result.parliamentary_constituency}/Addresses/`, {
+              fetch(`https://treatsmaproxy.herokuapp.com/membersdataplatform/services/mnis/members/query/House=Commons%7Cconstituency=${json.result.parliamentary_constituency}/Addresses/`, {
                 headers: new Headers({
                   'Accept': 'application/json'
                 })
