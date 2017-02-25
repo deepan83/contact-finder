@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import ContactAddress from './contact-address.js'
 
+const PRIMARY_ADDRESS_TYPE = 'Constituency';
+const SECONDARY_ADDRESS_TYPE = 'Parliamentary';
+
 class ContactDetail extends Component {
 
  constructor() {
@@ -15,18 +18,42 @@ class ContactDetail extends Component {
      showSecondaryAddress = this.state.showSecondaryAddress;
 
    if (contact) {
-     let primaryAddress = contact.Addresses.Address.find((address) => {
-       return address.Type === 'Constituency';
-     }),
-       secondaryInformationArea = <button onClick={this.showSecondaryAddress} className="show-constituency-address">Show parliamentary address</button>;
+     let primaryAddress = null,
+       secondaryAddress = null,
+       secondaryInformationArea = null,
+       hasAddressList = !!contact.Addresses.Address.length,
+       primaryAndSecondaryAddressesInList = (hasAddressList &&
+         contact.Addresses.Address.filter((address) => {
+           return address.Type === PRIMARY_ADDRESS_TYPE || address.Type === SECONDARY_ADDRESS_TYPE;
+         })) || [],
+       hasBothPrimaryAndSecondaryAddressesInList = primaryAndSecondaryAddressesInList.length === 2,
+       hasOnlySecondaryAddressInList = !hasBothPrimaryAndSecondaryAddressesInList &&
+          primaryAndSecondaryAddressesInList.find((address) => {
+            return address.Type === SECONDARY_ADDRESS_TYPE;
+          });
 
-     if (showSecondaryAddress) {
-       let secondaryAddress = contact.Addresses.Address.find((address) => {
-         return address.Type === 'Parliamentary';
+     if (hasBothPrimaryAndSecondaryAddressesInList) {
+       primaryAddress = primaryAndSecondaryAddressesInList.find((address) => {
+         return address.Type === PRIMARY_ADDRESS_TYPE ;
        });
 
-       secondaryInformationArea = <div><button onClick={this.hideSecondaryAddress}>Hide parliamentary address</button><ContactAddress address={secondaryAddress}/></div>;
+       secondaryInformationArea = <button onClick={this.showSecondaryAddress} className="show-constituency-address">Show parliamentary address</button>;
+
+       if (showSecondaryAddress) {
+         secondaryAddress = primaryAndSecondaryAddressesInList.find((address) => {
+           return address.Type === SECONDARY_ADDRESS_TYPE;
+         });
+
+         secondaryInformationArea = <div><button onClick={this.hideSecondaryAddress}>Hide parliamentary address</button><ContactAddress address={secondaryAddress}/></div>;
+       }
+     } else if (hasOnlySecondaryAddressInList) {
+       primaryAddress = primaryAndSecondaryAddressesInList.find((address) => {
+         return address.Type === SECONDARY_ADDRESS_TYPE;
+       });
+     } else {
+       primaryAddress = contact.Addresses.Address;
      }
+
 
      return (
        <div>
